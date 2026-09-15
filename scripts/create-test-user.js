@@ -1,3 +1,4 @@
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 const { PrismaClient } = require('@prisma/client');
 const { PrismaPg } = require('@prisma/adapter-pg');
 const { Pool } = require('pg');
@@ -83,7 +84,7 @@ async function seedCollector(prisma, phone, email, firstName, lastName) {
         firstName,
         lastName,
         role: 'COLLECTOR',
-        userType: 'COLLECTOR',
+        userType: 'BUSINESS',
         referralCode,
         isActive: true,
         defaultAddress: 'KG 7 Ave, Kigali, Rwanda',
@@ -135,10 +136,9 @@ async function main() {
     process.exit(1);
   }
 
-  const isProduction = process.env.NODE_ENV === 'production';
   const pool = new Pool({
     connectionString,
-    ssl: isProduction ? { rejectUnauthorized: false } : false,
+    ssl: { rejectUnauthorized: false },
   });
   const adapter = new PrismaPg(pool);
   const prisma = new PrismaClient({ adapter });
