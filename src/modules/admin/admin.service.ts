@@ -1234,11 +1234,11 @@ export class AdminService {
       ),
       this.twilioService.sendSms(
         collector.user.phone,
-        `SmartEco: New pickup assigned (${pickup.reference}). Please check collector app for details.`,
+        `Ejova: New pickup assigned (${pickup.reference}). Please check collector app for details.`,
       ),
       this.twilioService.sendSms(
         pickup.user.phone,
-        `SmartEco: Collector assigned for pickup ${pickup.reference}.`,
+        `Ejova: Collector assigned for pickup ${pickup.reference}.`,
       ),
     ]);
     await this.redis.del('cache:admin:dashboard');

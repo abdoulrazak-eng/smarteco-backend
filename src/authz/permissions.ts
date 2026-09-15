@@ -1,5 +1,5 @@
 /**
- * SmartEco Admin Portal — permission catalog and role policies.
+ * SmartEco AI Admin Portal — permission catalog and role policies.
  * Drop into: src/authz/permissions.ts (smarteco-backend, NestJS 11 + Prisma)
  *
  * Model: RBAC for the coarse grant + ABAC conditions for scope, amount caps,

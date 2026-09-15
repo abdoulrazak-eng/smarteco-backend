@@ -1,5 +1,5 @@
 /**
- * SmartEco IoT Gateway & Sensor Simulator (Plan B)
+ * SmartEco AI IoT Gateway & Sensor Simulator (Plan B)
  * 
  * Simulates real-time LoRaWAN gateway telemetry payloads over MQTT or HTTP REST
  * to test SmartBin fill-level monitoring, threshold triggers (80% alert, 90% auto-pickup),
@@ -38,7 +38,7 @@ const SIMULATED_BINS = [
 ];
 
 console.log('====================================================');
-console.log('🌿 SmartEco IoT Gateway & Telemetry Simulator (Plan B)');
+console.log('🌿 SmartEco AI IoT Gateway & Telemetry Simulator (Plan B)');
 console.log(`Mode: ${MODE.toUpperCase()}`);
 console.log(`Target: ${MODE === 'http' ? API_URL : MQTT_BROKER}`);
 console.log(`Update Interval: ${INTERVAL_MS} ms`);

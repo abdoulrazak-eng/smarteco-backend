@@ -12,6 +12,122 @@ function generateBinQrCode(userPrefix) {
   return `BIN-${userPrefix}-${code}`;
 }
 
+async function seedUser(prisma, phone, email, firstName, lastName) {
+  console.log(`\n--- Setting up Test Residential User: ${phone} ---`);
+  let user = await prisma.user.findUnique({ where: { phone } });
+
+  if (!user) {
+    const referralCode = 'TESTER' + Math.random().toString(36).substring(2, 7).toUpperCase();
+    user = await prisma.user.create({
+      data: {
+        phone,
+        email,
+        firstName,
+        lastName,
+        role: 'USER',
+        userType: 'RESIDENTIAL',
+        referralCode,
+        isActive: true,
+        defaultAddress: 'KN 3 Ave, Kigali, Rwanda',
+        homeLatitude: -1.9441,
+        homeLongitude: 30.0619,
+      },
+    });
+    console.log(`Created user: ${user.id} (${user.phone})`);
+
+    // EcoPoints bonus
+    await prisma.ecoPointTransaction.create({
+      data: {
+        userId: user.id,
+        points: 500,
+        action: 'REGISTRATION',
+        description: 'Welcome bonus: 500 EcoPoints',
+      },
+    });
+    console.log(`Added 500 EcoPoints.`);
+  } else {
+    console.log(`User already exists: ${user.id} (${user.phone})`);
+  }
+
+  // Ensure bins exist
+  const binsCount = await prisma.bin.count({ where: { userId: user.id } });
+  if (binsCount === 0) {
+    const userPrefix = user.id.substring(0, 3).toUpperCase();
+    const binTypes = ['ORGANIC', 'RECYCLABLE', 'EWASTE', 'GENERAL', 'GLASS', 'HAZARDOUS'];
+    const binData = binTypes.map((wasteType) => ({
+      userId: user.id,
+      wasteType,
+      qrCode: generateBinQrCode(userPrefix),
+      status: 'ACTIVE',
+    }));
+    await prisma.bin.createMany({ data: binData });
+    console.log(`Default bins created.`);
+  }
+
+  return user;
+}
+
+async function seedCollector(prisma, phone, email, firstName, lastName) {
+  console.log(`\n--- Setting up Test Collector User: ${phone} ---`);
+  let user = await prisma.user.findUnique({
+    where: { phone },
+    include: { collectorProfile: true },
+  });
+
+  if (!user) {
+    const referralCode = 'COLL' + Math.random().toString(36).substring(2, 7).toUpperCase();
+    user = await prisma.user.create({
+      data: {
+        phone,
+        email,
+        firstName,
+        lastName,
+        role: 'COLLECTOR',
+        userType: 'COLLECTOR',
+        referralCode,
+        isActive: true,
+        defaultAddress: 'KG 7 Ave, Kigali, Rwanda',
+        homeLatitude: -1.9500,
+        homeLongitude: 30.0600,
+      },
+    });
+    console.log(`Created collector user: ${user.id}`);
+  }
+
+  // Check or create collector profile
+  let profile = await prisma.collectorProfile.findUnique({
+    where: { userId: user.id },
+  });
+
+  if (!profile) {
+    profile = await prisma.collectorProfile.create({
+      data: {
+        userId: user.id,
+        collectorName: `${firstName} ${lastName}`,
+        vehiclePlate: 'RAD 789 X',
+        zone: 'Kigali Central',
+        rating: 4.9,
+        totalPickups: 24,
+        isAvailable: true,
+        isApproved: true,
+        approvedAt: new Date(),
+        approvedBy: 'SYSTEM_ADMIN',
+        latitude: -1.9500,
+        longitude: 30.0600,
+      },
+    });
+    console.log(`Created approved CollectorProfile for ${user.id}`);
+  } else if (!profile.isApproved) {
+    await prisma.collectorProfile.update({
+      where: { id: profile.id },
+      data: { isApproved: true, approvedAt: new Date() },
+    });
+    console.log(`Updated CollectorProfile to approved.`);
+  }
+
+  return user;
+}
+
 async function main() {
   const connectionString = process.env.DATABASE_URL;
   if (!connectionString) {
@@ -27,108 +143,24 @@ async function main() {
   const adapter = new PrismaPg(pool);
   const prisma = new PrismaClient({ adapter });
 
-  const phone = process.env.MOCK_PHONE_NUMBER || '+11234567890';
-  const email = 'playstore.tester@smarteco.rw';
-
-  console.log(`Checking for test user with phone: ${phone}`);
-
   try {
-    // Clean up any old test user with the same email but different phone to prevent unique constraint conflicts
-    const oldUserWithEmail = await prisma.user.findUnique({ where: { email } });
-    if (oldUserWithEmail && oldUserWithEmail.phone !== phone) {
-      console.log(`Deleting old test user with conflicting email: ${email}`);
-      await prisma.user.delete({ where: { id: oldUserWithEmail.id } });
-    }
+    // 1. Regular User demo account
+    await seedUser(prisma, '+11234567890', 'appstore.user@smarteco.rw', 'Demo', 'Resident');
 
-    let user = await prisma.user.findUnique({
-      where: { phone },
-    });
+    // 2. Collector demo account (+19997654321 bypasses Twilio with OTP 123456)
+    await seedCollector(prisma, '+19997654321', 'appstore.collector@smarteco.rw', 'Demo', 'Collector');
 
-    if (user) {
-      console.log(`Test user already exists: ${user.id} (${user.phone}). Skipping creation.`);
-      
-      // Check if bins exist, if not create them
-      const binsCount = await prisma.bin.count({
-        where: { userId: user.id },
-      });
-      if (binsCount === 0) {
-        console.log(`Creating default bins for existing test user...`);
-        const userPrefix = user.id.substring(0, 3).toUpperCase();
-        const binTypes = ['ORGANIC', 'RECYCLABLE', 'EWASTE', 'GENERAL', 'GLASS', 'HAZARDOUS'];
-        const binData = binTypes.map((wasteType) => ({
-          userId: user.id,
-          wasteType,
-          qrCode: generateBinQrCode(userPrefix),
-          status: 'ACTIVE',
-        }));
-        await prisma.bin.createMany({ data: binData });
-        console.log(`Bins created successfully.`);
-      }
-    } else {
-      console.log(`Test user does not exist. Creating new test user...`);
-      const referralCode = 'TESTER' + Math.random().toString(36).substring(2, 7).toUpperCase();
-      
-      user = await prisma.user.create({
-        data: {
-          phone,
-          email,
-          firstName: 'Play Store',
-          lastName: 'Tester',
-          role: 'USER',
-          userType: 'RESIDENTIAL',
-          referralCode,
-          isActive: true,
-        },
-      });
-
-      console.log(`Test user created successfully: ${user.id}`);
-
-      // Create EcoPoints welcome transaction
-      await prisma.ecoPointTransaction.create({
-        data: {
-          userId: user.id,
-          points: 100,
-          action: 'REGISTRATION',
-          description: 'Welcome bonus: 100 EcoPoints',
-        },
-      });
-      console.log(`EcoPoints welcome bonus of 100 added.`);
-
-      // Create default bins
-      const userPrefix = user.id.substring(0, 3).toUpperCase();
-      const binTypes = ['ORGANIC', 'RECYCLABLE', 'EWASTE', 'GENERAL', 'GLASS', 'HAZARDOUS'];
-      const binData = binTypes.map((wasteType) => ({
-        userId: user.id,
-        wasteType,
-        qrCode: generateBinQrCode(userPrefix),
-        status: 'ACTIVE',
-      }));
-
-      await prisma.bin.createMany({ data: binData });
-      console.log(`Default bins created successfully.`);
-    }
-
-    // Verify everything is set up
-    const finalUser = await prisma.user.findUnique({
-      where: { id: user.id },
-      include: {
-        bins: true,
-        ecoPoints: true,
-      },
-    });
-
-    console.log('\n--- Test User Verification Summary ---');
-    console.log(`ID: ${finalUser.id}`);
-    console.log(`Phone: ${finalUser.phone}`);
-    console.log(`Email: ${finalUser.email}`);
-    console.log(`Name: ${finalUser.firstName} ${finalUser.lastName}`);
-    console.log(`Role: ${finalUser.role}`);
-    console.log(`EcoPoints Transactions Count: ${finalUser.ecoPoints.length}`);
-    console.log(`Waste Bins Count: ${finalUser.bins.length} (${finalUser.bins.map(b => b.wasteType).join(', ')})`);
-    console.log('--------------------------------------\n');
-
+    console.log('\n=============================================');
+    console.log('Test Accounts Successfully Seeded for App Review:');
+    console.log('1. Residential User:');
+    console.log('   Phone: +11234567890 (or +19991234567)');
+    console.log('   OTP:   123456');
+    console.log('2. Waste Collector:');
+    console.log('   Phone: +19997654321');
+    console.log('   OTP:   123456');
+    console.log('=============================================\n');
   } catch (error) {
-    console.error('Error creating test user:', error);
+    console.error('Error creating test users:', error);
     process.exit(1);
   } finally {
     await prisma.$disconnect();

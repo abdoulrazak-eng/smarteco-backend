@@ -228,7 +228,7 @@ export class PickupsService {
       assignedCollector
         ? 'Pickup Scheduled - Collector Assigned'
         : 'Pickup Scheduled',
-      `SmartEco: Pickup ${reference} scheduled for ${dto.timeSlot}. Status: ${pickup.status}.`,
+      `Ejova: Pickup ${reference} scheduled for ${dto.timeSlot}. Status: ${pickup.status}.`,
       { pickupId: pickup.id, reference: pickup.reference },
       ['IN_APP', 'PUSH', 'SMS', 'WHATSAPP'],
     );

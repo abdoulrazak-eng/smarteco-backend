@@ -922,7 +922,7 @@ export class SimulationService {
               wasteType: 'RECYCLABLE',
               scheduledDate: tomorrow.toISOString(),
               timeSlot: 'AFTERNOON_2_4',
-              address: '123 SmartEco Rd, Kigali',
+              address: '123 SmartEco AI Rd, Kigali',
               latitude: -1.9441,
               longitude: 30.0619,
               notes: 'Simulated manual pickup',

@@ -92,7 +92,7 @@ export class PaymentsService {
           'RWF',
           dto.phone,
           transactionRef,
-          `SmartEco Pickup ${pickup.reference}`,
+          `Ejova Pickup ${pickup.reference}`,
           `Payment for waste pickup ${pickup.reference}`,
         );
         externalRef = result.referenceId;

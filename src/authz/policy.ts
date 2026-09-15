@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unused-vars */
 /**
- * SmartEco Admin Portal — enforcement layer.
+ * SmartEco AI Admin Portal — enforcement layer.
  * Drop into: src/authz/policy.ts
  * Deps: @casl/ability @casl/prisma @nestjs/core
  */

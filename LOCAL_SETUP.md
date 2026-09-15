@@ -1,6 +1,6 @@
-# SmartEco Backend - Local Setup Guide
+# SmartEco AI Backend - Local Setup Guide
 
-Welcome to the SmartEco backend project! This guide provides step-by-step instructions for running the server on a new device.
+Welcome to the SmartEco AI backend project! This guide provides step-by-step instructions for running the server on a new device.
 
 Our application stack consists of:
 - **Node.js**: Runtime environment

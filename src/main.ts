@@ -56,12 +56,12 @@ async function bootstrap() {
 
   // ─── Swagger / OpenAPI ────────────────────────────
   const config = new DocumentBuilder()
-    .setTitle('SmartEco API')
+    .setTitle('Ejova API')
     .setDescription(
       `
 ## Smart Waste Management Platform API
 
-SmartEco enables residents and businesses in Rwanda to:
+Ejova enables residents and businesses in Rwanda to:
 - 📅 Schedule waste pickups
 - 📍 Track collectors in real-time
 - 🗑️ Manage IoT Smart Bins
@@ -91,7 +91,7 @@ All responses follow a consistent format:
     )
     .setVersion('1.0.0')
     .setContact(
-      'SmartEco Engineering',
+      'Ejova Engineering',
       'https://smarteco.rw',
       'api@smarteco.rw',
     )
@@ -123,7 +123,7 @@ All responses follow a consistent format:
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup(SWAGGER_PATH, app, document, {
-    customSiteTitle: 'SmartEco API Docs',
+    customSiteTitle: 'Ejova API Docs',
     customCss: `
       .swagger-ui .topbar { display: none }
       .swagger-ui .info .title { color: #2e7d32; }
@@ -143,7 +143,7 @@ All responses follow a consistent format:
   const port = process.env.PORT || 3000;
   await app.listen(port);
 
-  logger.log(`🚀 SmartEco API running on http://localhost:${port}`);
+  logger.log(`🚀 Ejova API running on http://localhost:${port}`);
   logger.log(
     `📚 Swagger docs available at http://localhost:${port}/${SWAGGER_PATH}`,
   );

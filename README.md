@@ -1,4 +1,4 @@
-# 🌿 SmartEco Backend
+# 🌿 SmartEco AI Backend
 
 > Smart Waste Management Platform for Rwanda — Backend API
 
@@ -7,7 +7,7 @@
 [![Prisma](https://img.shields.io/badge/Prisma-7-2D3748?logo=prisma)](https://www.prisma.io/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-SmartEco enables residents and businesses in Rwanda to schedule waste pickups, track collectors in real-time, manage IoT smart bins, earn EcoPoints rewards, and make mobile money payments — all from a single platform.
+SmartEco AI enables residents and businesses in Rwanda to schedule waste pickups, track collectors in real-time, manage IoT smart bins, earn EcoPoints rewards, and make mobile money payments — all from a single platform.
 
 ---
 

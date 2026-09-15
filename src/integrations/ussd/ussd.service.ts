@@ -94,7 +94,7 @@ export class UssdService {
 
   private mainMenu(): string {
     return [
-      'CON Welcome to SmartEco 🌿',
+      'CON Welcome to Ejova 🌿',
       '1. Schedule a Pickup',
       '2. Check Pickup Status',
       '3. View EcoPoints',
@@ -172,7 +172,7 @@ export class UssdService {
       // Find user
       const user = await this.prisma.user.findUnique({ where: { phone } });
       if (!user) {
-        return 'END You are not registered. Please download the SmartEco app to register first.';
+        return 'END You are not registered. Please download the Ejova app to register first.';
       }
 
       // Generate reference
@@ -219,7 +219,7 @@ export class UssdService {
       });
       await this.redis.set(idempotencyKey, { done: true }, 120);
 
-      return `END Pickup scheduled!\nRef: ${reference}\nType: ${wasteLabels[wasteIdx]}\nTime: Tomorrow ${timeLabels[timeIdx]}\n\nOpen SmartEco app for details.`;
+      return `END Pickup scheduled!\nRef: ${reference}\nType: ${wasteLabels[wasteIdx]}\nTime: Tomorrow ${timeLabels[timeIdx]}\n\nOpen Ejova app for details.`;
     }
 
     return 'END Invalid input. Please try again.';
@@ -230,7 +230,7 @@ export class UssdService {
   private async handleCheckStatus(phone: string): Promise<string> {
     const user = await this.prisma.user.findUnique({ where: { phone } });
     if (!user) {
-      return 'END You are not registered. Download the SmartEco app to register.';
+      return 'END You are not registered. Download the Ejova app to register.';
     }
 
     // Show active pickup
@@ -285,7 +285,7 @@ export class UssdService {
   private async handleEcoPoints(phone: string): Promise<string> {
     const user = await this.prisma.user.findUnique({ where: { phone } });
     if (!user) {
-      return 'END You are not registered. Download the SmartEco app to register.';
+      return 'END You are not registered. Download the Ejova app to register.';
     }
 
     const totalPoints = await this.prisma.ecoPointTransaction.aggregate({
@@ -313,7 +313,7 @@ export class UssdService {
   private async handleBinStatus(phone: string): Promise<string> {
     const user = await this.prisma.user.findUnique({ where: { phone } });
     if (!user) {
-      return 'END You are not registered. Download the SmartEco app to register.';
+      return 'END You are not registered. Download the Ejova app to register.';
     }
 
     const bins = await this.prisma.bin.findMany({
@@ -344,7 +344,7 @@ export class UssdService {
 
   private handleContactSupport(): string {
     return [
-      'END SmartEco Support:',
+      'END Ejova Support:',
       '📞 Call: +250788000000',
       '📧 Email: support@smarteco.rw',
       '💬 WhatsApp: +250788000000',

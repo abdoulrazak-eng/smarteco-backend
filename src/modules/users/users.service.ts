@@ -235,6 +235,90 @@ export class UsersService {
     };
   }
 
+  // ─── DELETE ACCOUNT ──────────────────────────────
+
+  async deleteAccount(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    this.logger.log(`Initiating account deletion for user: ${userId} (${user.phone})`);
+
+    // In a transaction, cancel active pickups, revoke tokens, clean notifications, and anonymize user
+    await this.prisma.$transaction(async (tx) => {
+      // 1. Cancel any active or pending pickups
+      await tx.pickup.updateMany({
+        where: {
+          userId,
+          status: { in: ['PENDING', 'CONFIRMED', 'COLLECTOR_ASSIGNED'] },
+        },
+        data: {
+          status: 'CANCELLED',
+          cancelReason: 'Account deleted by user',
+          cancelledAt: new Date(),
+        },
+      });
+
+      // 2. Delete all refresh tokens
+      await tx.refreshToken.deleteMany({
+        where: { userId },
+      });
+
+      // 3. Delete notifications
+      await tx.notification.deleteMany({
+        where: { userId },
+      });
+
+      // 4. Delete bins if not referenced in pickups, or inactivate them
+      try {
+        await tx.bin.deleteMany({
+          where: { userId },
+        });
+      } catch {
+        await tx.bin.updateMany({
+          where: { userId },
+          data: { status: 'INACTIVE' },
+        });
+      }
+
+      // 5. Purge PII and anonymize User record (maintains relational integrity while removing all personal identity)
+      const timestamp = Date.now();
+      const anonymizedPhone = `+deleted_${timestamp}_${userId.substring(0, 6)}`;
+
+      await tx.user.update({
+        where: { id: userId },
+        data: {
+          phone: anonymizedPhone,
+          email: null,
+          firstName: 'Deleted',
+          lastName: 'User',
+          avatarUrl: null,
+          defaultAddress: null,
+          homeLatitude: null,
+          homeLongitude: null,
+          fcmToken: null,
+          password: null,
+          isActive: false,
+        },
+      });
+    });
+
+    // 6. Evict caches from Redis
+    await this.redis.del(`cache:user:profile:${userId}`);
+    await this.redis.del(`user:session:${userId}`);
+
+    this.logger.log(`Account successfully deleted and anonymized for user: ${userId}`);
+
+    return {
+      success: true,
+      message: 'Your account and personal data have been successfully deleted.',
+    };
+  }
+
   // ─── PRIVATE HELPERS ─────────────────────────────
 
   private async getTotalPoints(userId: string): Promise<number> {

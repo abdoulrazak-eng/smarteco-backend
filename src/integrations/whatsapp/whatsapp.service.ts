@@ -145,10 +145,10 @@ export class WhatsAppService {
 
       if (!user) {
         const response = this.buildResponse([
-          '👋 Welcome to SmartEco!',
+          '👋 Welcome to Ejova!',
           '',
           "You're not registered yet.",
-          'Download the SmartEco app to get started:',
+          'Download the Ejova app to get started:',
           '📱 https://smarteco.rw/download',
         ]);
         await this.logMessage(
@@ -343,7 +343,7 @@ export class WhatsAppService {
 
   private mainMenu(name: string): string {
     return this.buildResponse([
-      `👋 Hi ${name}! Welcome to *SmartEco* 🌿`,
+      `👋 Hi ${name}! Welcome to *Ejova* 🌿`,
       '',
       'What would you like to do?',
       '',
@@ -422,7 +422,7 @@ export class WhatsAppService {
         '📋 *No Active Pickups*',
         '',
         "You don't have any active pickups right now.",
-        'Open the SmartEco app to schedule one!',
+        'Open the Ejova app to schedule one!',
         '',
         '_Reply "menu" for options._',
       ]);
@@ -522,7 +522,7 @@ export class WhatsAppService {
 
   private getSupport(): string {
     return this.buildResponse([
-      '🆘 *SmartEco Support*',
+      '🆘 *Ejova Support*',
       '',
       '📞 Call: +250788000000',
       '📧 Email: support@smarteco.rw',
