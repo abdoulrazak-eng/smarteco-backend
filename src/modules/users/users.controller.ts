@@ -1,4 +1,14 @@
-import { Controller, Get, Patch, Put, Body, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Patch,
+  Put,
+  Delete,
+  HttpCode,
+  HttpStatus,
+  Body,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -141,5 +151,26 @@ export class UsersController {
     @Body() dto: UpdateFcmTokenDto,
   ) {
     return this.usersService.updateFcmToken(userId, dto);
+  }
+
+  @Delete('me')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Delete current user account',
+    description:
+      'Permanently deletes or anonymizes user account and personal data in compliance with App Store Guideline 5.1.1(v). Revokes all active sessions and tokens.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Account and personal data successfully deleted',
+    schema: {
+      example: {
+        success: true,
+        message: 'Your account and personal data have been successfully deleted.',
+      },
+    },
+  })
+  async deleteAccount(@CurrentUser('id') userId: string) {
+    return this.usersService.deleteAccount(userId);
   }
 }
